@@ -1517,11 +1517,10 @@ namespace ts.FindAllReferences.Core {
              * will be included correctly.
              */
             const shorthandValueSymbol = checker.getShorthandAssignmentValueSymbol(location.parent);
-            const res2 = shorthandValueSymbol && cbSymbol(shorthandValueSymbol); //name
-            if (res2) return res2;
-
             //When renaming 'x' in `const o = { x }`, just rename the local variable
-            if (shorthandValueSymbol && isForRenamePopulateSearchSymbolSet) return;
+            if (shorthandValueSymbol && isForRenamePopulateSearchSymbolSet) {
+                return cbSymbol(shorthandValueSymbol);
+            }
 
             // If the location is in a context sensitive location (i.e. in an object literal) try
             // to get a contextual type for it, and add the property symbol from the contextual
@@ -1536,6 +1535,9 @@ namespace ts.FindAllReferences.Core {
             const propertySymbol = getPropertySymbolOfDestructuringAssignment(location, checker);
             const res1 = propertySymbol && cbSymbol(propertySymbol);
             if (res1) return res1;
+
+            const res2 = shorthandValueSymbol && cbSymbol(shorthandValueSymbol);
+            if (res2) return res2;
         }
 
         const res = fromRoot(symbol);
