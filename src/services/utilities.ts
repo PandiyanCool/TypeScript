@@ -1325,7 +1325,16 @@ namespace ts {
         });
     }
 
-    export function getPropertySymbolFromBindingElement(checker: TypeChecker, bindingElement: BindingElement & { name: Identifier }) {
+    //name
+    export function isObjectBindingElementWithoutPropertyName(bindingElement: Node): bindingElement is BindingElementWithoutPropertyName {
+        return isBindingElement(bindingElement) &&
+            isObjectBindingPattern(bindingElement.parent) &&
+            isIdentifier(bindingElement.name) &&
+            !bindingElement.propertyName;
+    }
+
+    export type BindingElementWithoutPropertyName = BindingElement & { name: Identifier }; //name
+    export function getPropertySymbolFromBindingElement(checker: TypeChecker, bindingElement: BindingElementWithoutPropertyName) {
         const typeOfPattern = checker.getTypeAtLocation(bindingElement.parent);
         const propSymbol = typeOfPattern && checker.getPropertyOfType(typeOfPattern, bindingElement.name.text);
         if (propSymbol && propSymbol.flags & SymbolFlags.Accessor) {

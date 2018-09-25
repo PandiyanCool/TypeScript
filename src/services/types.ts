@@ -619,6 +619,9 @@ namespace ts {
     }
 
     export interface RenameLocation extends DocumentSpan {
+        //TODO: remember to do in protocol too
+        readonly prefixText: string | undefined;
+        readonly suffixText: string | undefined;
     }
 
     export interface ReferenceEntry extends DocumentSpan {
@@ -626,6 +629,9 @@ namespace ts {
         isDefinition: boolean;
         isInString?: true;
     }
+
+    //mv
+    export interface ReferenceOrRenameEntry extends ReferenceEntry, RenameLocation {}
 
     export interface ImplementationLocation extends DocumentSpan {
         kind: ScriptElementKind;

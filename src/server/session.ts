@@ -1164,19 +1164,20 @@ namespace ts.server {
 
             const defaultProject = this.getDefaultProject(args);
             const renameInfo: protocol.RenameInfo = this.mapRenameInfo(defaultProject.getLanguageService().getRenameInfo(file, position), Debug.assertDefined(this.projectService.getScriptInfo(file)));
-            return { info: renameInfo, locs: this.toSpanGroups(locations) };
+            return { info: renameInfo, locs: this.toRenameSpanGroups(locations) };
         }
 
         private mapRenameInfo({ canRename, localizedErrorMessage, displayName, fullDisplayName, kind, kindModifiers, triggerSpan }: RenameInfo, scriptInfo: ScriptInfo): protocol.RenameInfo {
             return { canRename, localizedErrorMessage, displayName, fullDisplayName, kind, kindModifiers, triggerSpan: this.toLocationTextSpan(triggerSpan, scriptInfo) };
         }
 
-        private toSpanGroups(locations: ReadonlyArray<RenameLocation>): ReadonlyArray<protocol.SpanGroup> {
+        private toRenameSpanGroups(locations: ReadonlyArray<RenameLocation>): ReadonlyArray<protocol.SpanGroup> {
             const map = createMap<protocol.SpanGroup>();
-            for (const { fileName, textSpan } of locations) {
+            for (const { fileName, textSpan, prefixText, suffixText } of locations) {
                 let group = map.get(fileName);
                 if (!group) map.set(fileName, group = { file: fileName, locs: [] });
-                group.locs.push(this.toLocationTextSpan(textSpan, Debug.assertDefined(this.projectService.getScriptInfo(fileName))));
+                const scriptInfo = Debug.assertDefined(this.projectService.getScriptInfo(fileName));
+                group.locs.push({ ...this.toLocationTextSpan(textSpan, scriptInfo), prefixText, suffixText });
             }
             return arrayFrom(map.values());
         }
